@@ -2,7 +2,7 @@
     <head>
         <title>NinjaMan</title>
         <style>
-            div {
+            * {
                 padding: 0;
                 margin: 0;
             }
@@ -10,6 +10,7 @@
                 width: 40px;
                 height: 40px;
                 display: inline-block;
+                background-repeat: no-repeat;
             }
             .wall {
                 background-color: blue;
@@ -28,15 +29,22 @@
             #ninja-man {
                 background-color: black;
                 background-image: url("img/ninja.gif");
+                position: absolute;
             }
         </style>
     </head>
     <body>
+        <div id="score">
+            <div id="sushi">Sushi: 0</div>
+            <div id="onigiri">Onigiri: 0</div>
+        </div>
         <div id="world"></div>
-        <div id="ninja-man"></div>
+        <div id="ninja-man" class="world-block"></div>
     </body>
     <script>
         var world = [];
+        var sushiEaten = 0;
+        var onigiriEaten = 0;
         var worldWidth = 10;
         var worldHeight = 10;
 
@@ -96,6 +104,11 @@
 
         function buildWorld() {
             var worldContainer = document.getElementById("world");
+            
+            while(worldContainer.firstChild) {
+                worldContainer.removeChild(worldContainer.firstChild);
+            }
+
             for (var i = 0; i < worldHeight; ++i) {
                 var row = document.createElement("div");
                 for (var j = 0; j < worldWidth; ++j) {
@@ -121,7 +134,45 @@
             }
         }
 
+        function setNinjaMan() {
+            var worldContainer = document.getElementById("world");
+            var man = document.getElementById("ninja-man");
+            man.style.top = (worldContainer.offsetTop + ninjaMan.row * 40) + "px";
+            man.style.left = (worldContainer.offsetLeft + ninjaMan.col * 40) + "px";
+        }
+
+        function updateScore() {
+            var sushiScore = document.getElementById("sushi");
+            sushiScore.textContent = "Sushi: " + sushiEaten;
+            var onigiriScore = document.getElementById("onigiri");
+            onigiriScore.textContent = "Onigiri: " + onigiriEaten;
+        }
+
+        function update() {
+            if (world[ninjaMan.row][ninjaMan.col] == worldDict.SUSHI) ++sushiEaten;
+            if (world[ninjaMan.row][ninjaMan.col] == worldDict.ONIGIRI) ++onigiriEaten;
+            world[ninjaMan.row][ninjaMan.col] = worldDict.EMPTY;
+            buildWorld();
+            setNinjaMan();
+            updateScore();
+        }
+
         generateWorld(10);
         buildWorld();
+        setNinjaMan();
+
+        document.onkeydown = function(e) {
+            if (e.keyCode == 37 && world[ninjaMan.row][ninjaMan.col - 1] != worldDict.WALL) {
+                --ninjaMan.col;
+            } else if (e.keyCode == 38 && world[ninjaMan.row - 1][ninjaMan.col] != worldDict.WALL) {
+                --ninjaMan.row;
+            } else if (e.keyCode == 39 && world[ninjaMan.row][ninjaMan.col + 1] != worldDict.WALL) {
+                ++ninjaMan.col;
+            } else if (e.keyCode == 40 && world[ninjaMan.row + 1][ninjaMan.col] != worldDict.WALL) {
+                ++ninjaMan.row;
+            }
+            update();
+        }
+
     </script>
 </htm>
