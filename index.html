@@ -1,0 +1,127 @@
+<htm>
+    <head>
+        <title>NinjaMan</title>
+        <style>
+            div {
+                padding: 0;
+                margin: 0;
+            }
+            .world-block {
+                width: 40px;
+                height: 40px;
+                display: inline-block;
+            }
+            .wall {
+                background-color: blue;
+            }
+            .empty {
+                background-color: black;
+            }
+            .sushi {
+                background-color: black;
+                background-image: url("img/sushi.png");
+            }
+            .onigiri {
+                background-color: black;
+                background-image: url("img/onigiri.png");
+            }
+            #ninja-man {
+                background-color: black;
+                background-image: url("img/ninja.gif");
+            }
+        </style>
+    </head>
+    <body>
+        <div id="world"></div>
+        <div id="ninja-man"></div>
+    </body>
+    <script>
+        var world = [];
+        var worldWidth = 10;
+        var worldHeight = 10;
+
+        for (var i = 0; i < worldHeight; ++i) {
+            var row = [];
+            world.push(Array(worldWidth).fill(1, 0, worldWidth));
+        }
+
+        var worldDict = {
+            WALL: 1,
+            SUSHI: 2,
+            ONIGIRI: 3,
+            EMPTY: 4,
+        }
+
+        var ninjaMan = {
+            row: Math.ceil(Math.random() * (worldHeight - 2)),
+            col: Math.ceil(Math.random() * (worldWidth - 2))
+        };
+
+        function generateWorld(numNodes) {
+            world[ninjaMan.row][ninjaMan.col] = worldDict.EMPTY;
+            for (var i = 0; i < numNodes; ++i) {
+                var node = {
+                    row: ninjaMan.row,
+                    col: ninjaMan.col
+                };
+                while (world[node.row][node.col] != worldDict.WALL) {
+                    node = {
+                        row: Math.ceil(Math.random() * (worldHeight - 2)),
+                        col: Math.ceil(Math.random() * (worldWidth - 2))
+                    };
+                }
+                directedWalk(node, ninjaMan);
+            }
+        }
+
+        function directedWalk(start, goal) {
+            world[start.row][start.col] = worldDict.ONIGIRI;
+            var current = start;
+            while (current.row != goal.row || current.col != goal.col) {
+                var rand = Math.random();
+                if (rand > .5) {
+                    if (current.row > goal.row) --current.row;
+                    else if (current.row < goal.row) ++current.row;
+                    else if (current.col > goal.col) --current.col;
+                    else if (current.col < goal.col) ++current.col;
+                } else {
+                    if (current.col > goal.col) --current.col;
+                    else if (current.col < goal.col) ++current.col;
+                    else if (current.row > goal.row) --current.row;
+                    else if (current.row < goal.row) ++current.row;
+                }
+                if (world[current.row][current.col] == worldDict.WALL) world[current.row][current.col] = worldDict.SUSHI;
+            }
+        }
+
+        function buildWorld() {
+            var worldContainer = document.getElementById("world");
+            for (var i = 0; i < worldHeight; ++i) {
+                var row = document.createElement("div");
+                for (var j = 0; j < worldWidth; ++j) {
+                    var cell = document.createElement("div");
+                    cell.classList.add("world-block");
+                    switch(world[i][j]) {
+                        case worldDict.EMPTY: {
+                            cell.classList.add("empty")
+                        } break;
+                        case worldDict.ONIGIRI: {
+                            cell.classList.add("onigiri");
+                        } break;
+                        case worldDict.SUSHI: {
+                            cell.classList.add("sushi");
+                        } break;
+                        case worldDict.WALL: {
+                            cell.classList.add("wall");
+                        } break;
+                    }
+                    row.appendChild(cell);
+                }
+                worldContainer.appendChild(row);
+            }
+        }
+
+        generateWorld(10);
+        buildWorld();
+    </script>
+</htm>
